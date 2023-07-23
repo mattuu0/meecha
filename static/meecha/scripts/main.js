@@ -1,3 +1,17 @@
+//マップ設定
+const main_map = L.map('show_map')
+
+var tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© <a href="http://osm.org/copyright">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
+});
+
+tileLayer.addTo(main_map);
+
+//各ユーザーのピン
+var user_pins = {};
+var myself_marker = null;
+
+//Websockeet
 let ws_conn;
 var ws_connected = false;
 
@@ -369,15 +383,15 @@ function show_search_result(result) {
         request_btn.type = "button";
         
         request_btn.userid = userid;
+        request_btn.value = "フレンドリクエスト";
+
         //イベント登録
         if (result[userid].is_friend == "0") {
             //フレンドリクエストボタン
-            request_btn.value = "フレンドリクエスト";
             request_btn.addEventListener("click",send_firend_req);
         } else {
             //フレンドならボタンを無効にする
-            request_btn.value = "フレンドを削除";
-            
+            request_btn.disabled = true;
         }
 
         add_div.append(request_btn);
@@ -414,7 +428,21 @@ var id, target, options;
 function success(pos) {
     var crd = pos.coords;
 
-    console.log(crd.latitude,crd.longitude);
+    //マーカーが設定されていなかったら現在地に打つ
+    if (myself_marker == null) {
+        main_map.setView([crd.latitude,crd.longitude],15);
+
+        var popup = L.popup();
+        myself_marker = L.marker([crd.latitude,crd.longitude]).addTo(main_map).on('click', function (e) {
+                popup
+                .setLatLng(e.latlng)
+                .setContent("あなたの現在地")
+                .openOn(main_map);
+        });
+    } else {
+        //マーカーがあったら移動する
+        myself_marker.setLatLng([crd.latitude,crd.longitude])
+    }
 
     send_command("post_location",{
         latitude : crd.latitude,
@@ -430,10 +458,14 @@ function clear_watch() {
     navigator.geolocation.clearWatch(id);
 }
 
-options = {
+options = { 
     enableHighAccuracy: true,
     timeout: 5000,
     maximumAge: 5000
 };
 
-id = navigator.geolocation.watchPosition(success, error, options);
+function start_gps() {
+    id = navigator.geolocation.watchPosition(success, error, options);
+}
+
+start_gps();

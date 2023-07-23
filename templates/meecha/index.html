@@ -6,9 +6,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>位置情報共有</title>
-
-    <script src="{% static 'meecha/scripts/js.cookie.min.js' %}"></script>
-    <link rel="stylesheet" href="{% static 'meecha/styles/main.css' %}">
 </head>
 <body>
     {% csrf_token %}
@@ -33,7 +30,7 @@
         アカウントアイコン
     </div>
     <div class="container">
-        <img src="{% static 'meecha/images/sample.png' %}" alt="">
+        <div id="show_map" class="map_area"></div>
     </div>
 
     <div class="user_search_area">
@@ -67,6 +64,10 @@
         
     </div>
 
+    <script src="{% static 'meecha/scripts/js.cookie.min.js' %}"></script>
+    <script src="{% static 'meecha/leaflet/leaflet.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'meecha/styles/main.css' %}">
+    <link rel="stylesheet" href="{% static 'meecha/leaflet/leaflet.css' %}">
     <script src="{% static 'meecha/scripts/main.js' %}"></script>
 </body>
 </html>
