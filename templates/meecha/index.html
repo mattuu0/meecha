@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+{% load static %}
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>位置情報共有</title>
+
+    <script src="{% static 'meecha/scripts/js.cookie.min.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'meecha/styles/main.css' %}">
+</head>
+<body>
+    {% csrf_token %}
+    <h1>メインページ</h1>
+
+    <nav>
+        <a href="/accounts/logout">ログアウト</a>
+        <a href="/accounts/password/change/">パスワード変更</a>
+        <a href="/accounts/password/reset/">パスワードリセット</a>
+    </nav>
+    
+    {% if request.user.is_authenticated %}
+    <div class="user_info">
+        <p>ユーザー名 : {{ request.user.username }}</p>
+        <p>ユーザーID : {{ request.user.userid }}</p>
+    </div>
+    {% else %}
+    <p>ログインしていません</p>
+    {% endif %}
+
+    <div class="acount_info">
+        アカウントアイコン
+    </div>
+    <div class="container">
+        <img src="{% static 'meecha/images/sample.png' %}" alt="">
+    </div>
+
+    <div class="user_search_area">
+        <p>検索</p>
+        <input type="text" placeholder="ユーザー名" id="search_username_value">
+        <button id="user_search_button">検索</button>
+    </div>
+
+    <div id="user_searh_result">
+        
+    </div>
+
+    <div class="get_recved_request_button">
+        <button id="get_request_button">受信済みリクエスト取得</button>
+    </div>
+    <div id="recved_request_show_area">
+        
+    </div>
+
+    <div class="sended_request_area">
+        <button id="sended_request_button">送信済みリクエスト取得</button>
+    </div>
+    <div id="sended_request_show_area">
+        
+    </div>
+
+    <div class="friends_area">
+        <button id="get_friends_button">フレンド一覧取得</button>
+    </div>
+    <div id="friends_show_area">
+        
+    </div>
+
+    <script src="{% static 'meecha/scripts/main.js' %}"></script>
+</body>
+</html>

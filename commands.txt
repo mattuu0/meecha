@@ -1,0 +1,13 @@
+sudo apt update
+
+sudo apt install redis-server
+sudo systemctl start redis-server
+
+pip install -r requirements.txt
+
+django-admin startproject config .
+django-admin startapp accounts
+django-admin startapp meecha
+
+python3 manage.py makemigrations
+python3 manage.py migrate
