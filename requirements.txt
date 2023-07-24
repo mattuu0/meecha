@@ -15,6 +15,8 @@ defusedxml==0.7.1
 Django==4.2.3
 django-allauth==0.54.0
 django-bootstrap5==23.3
+geographiclib==2.0
+geopy==2.3.0
 hyperlink==21.0.0
 idna==3.4
 incremental==22.10.0

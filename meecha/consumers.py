@@ -7,7 +7,7 @@ from asgiref.sync import sync_to_async
 from .models import Friend_data,Friend_request,Geo_Data
 from uuid import UUID,uuid4
 from django.db.models import Q
-import math
+from geopy.distance import geodesic
 
 class ChatConsumer(AsyncWebsocketConsumer):
     user_searching = False
@@ -285,18 +285,17 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 friend_geo_data = check_friend_geo.get(user = friend_user)
 
                 #自身の位置情報
-                myself_latitude = data["latitude"]
+                myself_latitude = float(data["latitude"])
                 myself_longitude = float(data["longitude"])
 
                 #フレンドの位置情報
                 friend_latitube = friend_geo_data.latitude
                 friend_longitude = friend_geo_data.longitude
 
-                bigger_latitude_data = max(myself_latitude,friend_latitube)
-                bigger_longitude_data = max(myself_longitude,friend_longitude)
+                #距離をメートルで取得
+                distance_m = geodesic([myself_latitude,myself_longitude],[friend_latitube,friend_longitude]).m
 
-                smaller_latitude_data = max(myself_latitude,friend_latitube)
-                smaller_longitude_data = max(myself_longitude,friend_longitude)
+                
 
         except Geo_Data.DoesNotExist:
             geo_data = Geo_Data()

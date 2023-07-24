@@ -6,7 +6,6 @@ var tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
 });
 
 tileLayer.addTo(main_map);
-
 //各ユーザーのピン
 var user_pins = {};
 var myself_marker = null;
@@ -98,6 +97,9 @@ const get_friends_btn = document.getElementById("get_friends_button");
 
 //フレンド表示場所
 const friend_show_area = document.getElementById("friends_show_area");
+
+//マップを追跡させるか
+const auto_change_map_check = document.getElementById("auto_change_map");
 
 function init(evt) {
     //オブジェクト取得
@@ -434,14 +436,18 @@ function success(pos) {
 
         var popup = L.popup();
         myself_marker = L.marker([crd.latitude,crd.longitude]).addTo(main_map).on('click', function (e) {
-                popup
-                .setLatLng(e.latlng)
-                .setContent("あなたの現在地")
-                .openOn(main_map);
+            popup
+            .setLatLng(e.latlng)
+            .setContent("あなたの現在地")
+            .openOn(main_map);
         });
     } else {
         //マーカーがあったら移動する
         myself_marker.setLatLng([crd.latitude,crd.longitude])
+    }
+
+    if (auto_change_map_check.checked) {
+        main_map.setView([crd.latitude,crd.longitude],main_map.getZoom());
     }
 
     send_command("post_location",{

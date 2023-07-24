@@ -23,9 +23,16 @@ class Friend_data(models.Model):
 
     timestamp = models.DateTimeField(auto_now_add=True)                                                                         #タイムスタンプ
 
+    def __str__(self) -> str:
+        return str(self.dataid)
+
 class Friend_request(models.Model):
     dataid = models.UUIDField(default=uuid4(),primary_key=True,editable=False)
     
     from_user =  models.ForeignKey(CustomUser,on_delete=models.CASCADE,null=True,blank=True,related_name="request_from_user")           #送った人
     to_user =  models.ForeignKey(CustomUser,on_delete=models.CASCADE,null=True,blank=True,related_name="request_to_user")               #送られた人
     timestamp = models.DateTimeField(auto_now_add=True)                                                                         #タイムスタンプ
+
+    def __str__(self) -> str:
+        return str(self.dataid)
+    
