@@ -1,6 +1,5 @@
  
 import json
- 
 from channels.generic.websocket import AsyncWebsocketConsumer
 from accounts.models import CustomUser
 from asgiref.sync import sync_to_async
@@ -8,6 +7,7 @@ from .models import Friend_data,Friend_request,Geo_Data
 from uuid import UUID,uuid4
 from django.db.models import Q
 from geopy.distance import geodesic
+import datetime,time
 
 class ChatConsumer(AsyncWebsocketConsumer):
     user_searching = False
@@ -250,7 +250,34 @@ class ChatConsumer(AsyncWebsocketConsumer):
             await self.send(text_data=json.dumps(base_dict))
 
         elif command == "post_location":
-            await self.post_location(user,data)
+            is_success,friends_data = await self.post_location(user,data)
+
+            if is_success:
+                for friendid in friends_data.keys():
+                    #近くにいるフレンドに通知を送る
+
+                    send_dict = {
+                        "msgtype" : "friend_geo_notify",
+                        "data" : friends_data[friendid]
+                    }
+
+                    await self.channel_layer.group_send(  # 指定グループにメッセージを送信する
+                        str(friendid),
+                        {
+                            'type': 'data_message',
+                            'data': send_dict,
+                            'user': str(self.scope['user'].userid),
+                        }
+                    )
+                
+                #近くのフレンド一覧を送り返す
+                send_dict = {
+                    "msgtype" : "near_friends_notify",
+                    "data" : friends_data
+                }
+                base_dict["data"] = send_dict
+                await self.send(text_data=json.dumps(base_dict))
+
         else:
             print(data_json)
 
@@ -268,12 +295,19 @@ class ChatConsumer(AsyncWebsocketConsumer):
             #フレンドを検索する
             friends = Friend_data.objects.filter(Q(to_user = user) | Q(from_user = user))
 
+            return_dict = {}
+
             for friend in friends.all():
                 if friend.from_user == user:
                     friend_user = friend.to_user
                 else:
                     friend_user = friend.from_user
+
                 
+                #フレンドユーザーが接続していなかったら戻る
+                if not friend_user.now_connected:
+                    continue
+
                 #位置情報取得
                 check_friend_geo = Geo_Data.objects.filter(user = friend_user)
                 
@@ -295,7 +329,15 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 #距離をメートルで取得
                 distance_m = geodesic([myself_latitude,myself_longitude],[friend_latitube,friend_longitude]).m
 
+                if 5000 > distance_m:
+                    return_dict[str(friend_user.userid)] = {
+                        "username" : str(friend_user.username),
+                        "geo_data" : [friend_latitube,friend_longitude],
+                        "distance" : distance_m,
+                        "timestamp" : str(time.mktime(friend_geo_data.timestamp.timetuple()))
+                    }
                 
+            return True,return_dict
 
         except Geo_Data.DoesNotExist:
             geo_data = Geo_Data()
@@ -310,9 +352,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
             import traceback
             traceback.print_exc()
 
-            return False
+            return False,{}
         
-        return True
+        return True,{}
 
     #フレンドを削除する
     @sync_to_async
@@ -499,7 +541,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             })
         
         return result_list
-
+    
     @sync_to_async
     def search_user(self,username,user):
         #すでに検索中なら戻る
