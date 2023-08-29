@@ -93,13 +93,18 @@ button{
 }
 
 .user_search_area{
-  margin-left: 10vw;
+  margin-left: 0px;
   margin-bottom: 10px;
+  margin-top: 10px;
 }
 
 .user_search_area button{
   border-radius: 5px;
   background-color: #5da38ccc;
+}
+
+.user_search_area input{
+  width: 50%;  
 }
 
 .arrow{
@@ -141,4 +146,39 @@ button{
 
 .sended_request_area {
   margin: 0px;
+}
+
+.meecha_button {
+  border-radius: 5px;
+  background-color: #5da38ccc;
+}
+
+
+.menu_button{
+  width: 100vw;
+  display: flex;
+
+  bottom: 50px;
+  margin: auto;
+  align-content: stretch;
+}
+
+.memo_btn {
+  font-family: 'Zen Maru Gothic', sans-serif;
+  background-color: #5da38ccc;
+  border: 0;
+  margin: 10px;
+}
+
+.friend_info * {
+  margin: 3px;
+}
+
+.friend_info {
+  border-bottom: #000 1px dotted;
+}
+
+.memo_textarea {
+  width: 90%;
+  margin: auto;
 }

@@ -89,7 +89,7 @@
           </div>
 
           <div>
-              <button id="get_friends_button" class="button_radius">
+              <button id="search_user_button" class="button_radius">
                   ユーザー検索
               </button>
           </div>
@@ -139,14 +139,22 @@
           </div>
         </div>
       </div>
-      <div class="user_search_area">
-        <input type="text" placeholder="ユーザー名" id="search_username_value">
-        <button id="user_search_button">検索</button>
-        <button id="search_clear_btn">クリア</button>
-      </div>
-    
-      <div id="user_searh_result">
-    
+      
+      
+      <div id="pupup_search_area" class="popup">
+        <div class="popup_inner">
+          <div id="user_search_area_popover" class="popover">
+            
+            <div class="user_search_area">
+              <input type="text" placeholder="ユーザー名" id="search_username_value">
+              <button id="user_search_button">検索</button>
+              <button id="search_clear_btn">クリア</button>
+            </div>
+            <div id="user_searh_result">
+          
+            </div>
+          </div>
+        </div>
       </div>
   </div>
   </main>

@@ -132,6 +132,8 @@ function send_command(command,data) {
     }
 }
 
+//設定
+var recved_requests = {}
 
 let select_box = document.getElementById("notify_distances_select");
 let distance_show_area = document.getElementById("distance_show");
@@ -189,6 +191,12 @@ const setting_notify_distance = document.getElementById("setting_notify_distance
 //通知距離表示エリア
 const setting_distance_area = document.getElementById("setting_distance_area");
 
+//ユーザー検索ボタン
+const search_user_button = document.getElementById("search_user_button");
+
+//検索エリア
+const pupup_search_area = document.getElementById("pupup_search_area");
+
 function init(evt) {
     //オブジェクト取得
     
@@ -204,6 +212,7 @@ function init(evt) {
     get_friends_btn.addEventListener("click",get_friends);
     clear_search_btn.addEventListener("click",clear_friend_search);
     setting_notify_distance.addEventListener("click",show_setting_distance);
+    search_user_button.addEventListener("click",show_pupup_search_area)
 }
 
 window.onload = init;
@@ -211,6 +220,11 @@ window.onload = init;
 function show_setting_distance(evt) {
     setting_distance_area.classList.toggle("is-show");
 }
+
+function show_pupup_search_area(evt) {
+    pupup_search_area.classList.toggle("is-show");
+}
+
 
 //ユーザー検索関連
 function clear_child_elems(elem) {
@@ -278,6 +292,7 @@ function show_friend_request(senderid,username,requestid,showdiv) {
     accept_btn.value = "承認";
     accept_btn.requestid = requestid;
     accept_btn.base_div = add_div;
+    accept_btn.classList.add("meecha_button");
 
     //イベント登録
     accept_btn.addEventListener("click",accept_friend_request);
@@ -289,6 +304,7 @@ function show_friend_request(senderid,username,requestid,showdiv) {
     reject_btn.value = "拒否";
     reject_btn.requestid = requestid;
     reject_btn.base_div = add_div;
+    reject_btn.classList.add("meecha_button");
 
     //イベント登録
     reject_btn.addEventListener("click",reject_friend_request);
@@ -369,6 +385,7 @@ function show_friend(result) {
     result.forEach((val,index) => {
         //結果のdiv
         let add_div = document.createElement("div");
+        add_div.classList.add("friend_info");
 
         /*ID表示
         let sender_userid_area = document.createElement("p");
@@ -385,18 +402,17 @@ function show_friend(result) {
         //追加
         add_div.appendChild(username_area);
 
-
         //削除ボタン
         let remove_btn = document.createElement("input");
         remove_btn.type = "button";
         remove_btn.value = "フレンド削除";
         remove_btn.friendid = val["friendid"];
         remove_btn.base_div = add_div;
+        remove_btn.classList.add("memo_btn");
 
         //イベント登録
         remove_btn.addEventListener("click",remove_friend);
         add_div.append(remove_btn);
-
 
         //メモ編集エリア
         let friend_memo_area = document.createElement("div");
@@ -407,6 +423,7 @@ function show_friend(result) {
         memo_area.friendid = val["friendid"];
         memo_area.friend_userid = val["friend_userid"];
         memo_area.value = val["friend_memo"];
+        memo_area.classList.add("memo_textarea");
         friend_memo_area.append(memo_area);
 
         //フレンドリクエストボタン
@@ -416,10 +433,12 @@ function show_friend(result) {
         memo_btn.friendid = val["friendid"];
         memo_btn.friend_userid = val["friend_userid"];
         memo_btn.memo_text_area = memo_area;
-
+        memo_btn.classList.add("memo_btn");
         //イベント登録
         memo_btn.addEventListener("click",update_memo);
-        friend_memo_area.append(memo_btn);
+        //friend_memo_area.append(memo_btn);
+        
+        add_div.append(memo_btn);
 
         add_div.appendChild(friend_memo_area);
 
