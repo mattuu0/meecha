@@ -68,19 +68,38 @@ button{
   margin: 0 5%;
 }
 
-.password,.logout,.distance{
+.menu{
   display: flex;
   align-items: center;
   margin-bottom: 20px;
 }
 
 .logout{
-  margin-left: 2%; 
+  margin-left: 1%; 
+}
+
+.friends{
+  margin-bottom: 10px;
+}
+
+.friends img{
+  width: 10vw;
+  height: 9vw;
 }
 
 .set img{
   width: 10vw;
   height: 10vw;
+}
+
+.friends_button button{
+  color: #038da2;
+}
+
+.friends_button div{
+  font-size: 1em;
+  margin-bottom: 10px;
+  margin-left: 18vw;
 }
 
 .arrow{
@@ -95,3 +114,4 @@ button{
   margin-top: 25px;
   padding: 1.5em 1.2em;
 }
+

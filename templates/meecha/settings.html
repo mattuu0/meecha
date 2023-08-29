@@ -34,7 +34,7 @@
 
     <div class="set">
 
-      <div class="distance">
+      <div class="distance menu">
         <div class="setting_elements"><img src="{% static 'meecha/images/distance.png' %}" alt=""></div>
         <button popovertarget="setting_distance" class="setting_notify_distance">通知する距離</button>
         <div id="setting_distance" popover class="popover">
@@ -53,20 +53,27 @@
         </div>
       </div>
 
-      <div class="password">
+      <div class="password menu">
         <div class="setting_elements"><img src="{% static 'meecha/images/password.png' %}" alt=""></div>
         <div ><a href="/accounts/password/change/">パスワード変更</a></div>
       </div>
       
-      <div class="logout">
+      <div class="logout menu">
         <div class="setting_elements"><img src="{% static 'meecha/images/logout.png' %}" alt=""></div>
         <div><a href="/accounts/logout">ログアウト</a></div>
       </div>
+
     </div>
 
-    <div id="menu">                
-      <div class="menu_button">
+    <div class="friends menu">
+      <div class="setting_elements"><img src="{% static 'meecha/images/friends.png' %}" alt=""></div>
+      <div>フレンド</div>
+    </div>
+    
+  </div>
 
+    <div id="friends_area">          
+      <div class="friends_button">
           <div>
               <button popovertarget="friends_area" id="get_friends_button" class="button_radius">
                   フレンド一覧
@@ -87,14 +94,14 @@
 
       </div>
 
-      <div id="recved_request_area" popover class="popover">
+      <div id="recved_request_area">
           <p>受信済みリクエスト</p>
           <div id="recved_request_show_area">
           
           </div>
       </div>
 
-      <div id="sended_request_area" popover class="popover">
+      <div id="sended_request_area">
           <p>送信済みリクエスト</p>
           <div id="sended_request_show_area">
 
@@ -102,7 +109,7 @@
       </div>
 
 
-      <div id="friends_area" popover class="popover">
+      <div id="friends_area">
           <p>フレンド一覧</p>
           <div id="friends_show_area">
 
