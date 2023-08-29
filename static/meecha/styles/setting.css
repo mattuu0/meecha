@@ -40,7 +40,6 @@ button{
   background-color: rgba(0, 0, 0, 0);
   color: #00525f;
   border: none;
-  border-radius: 8px;
   justify-content: center;
   align-items: center;
   font-size: 1em;
@@ -69,6 +68,10 @@ button{
   margin-left: 2%; 
 }
 
+.friends {
+  margin-bottom: 0;
+}
+
 .friends img{
   width: 10vw;
   height: 9vw;
@@ -87,6 +90,16 @@ button{
 .set img{
   width: 10vw;
   height: 10vw;
+}
+
+.user_search_area{
+  margin-left: 10vw;
+  margin-bottom: 10px;
+}
+
+.user_search_area button{
+  border-radius: 5px;
+  background-color: #5da38ccc;
 }
 
 .arrow{

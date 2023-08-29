@@ -72,16 +72,6 @@
     
   </div>
 
-  <div class="user_search_area">
-    <input type="text" placeholder="ユーザー名" id="search_username_value">
-    <button id="user_search_button">検索</button>
-    <button id="search_clear_btn">クリア</button>
-  </div>
-
-  <div id="user_searh_result">
-
-  </div>
-
     <div id="friends_area">          
       <div class="friends_button">
           <div>
@@ -89,6 +79,12 @@
                   フレンド一覧
               </button>
           </div>
+
+          <div>
+            <button popovertarget="friends_area" id="get_friends_button" class="button_radius">
+                ユーザー検索
+            </button>
+        </div>
 
           <div>
               <button popovertarget="recved_request_area" id="get_request_button" class="button_radius">
@@ -118,6 +114,16 @@
           <div id="sended_request_show_area">
 
           </div>
+      </div>
+
+      <div class="user_search_area">
+        <input type="text" placeholder="ユーザー名" id="search_username_value">
+        <button id="user_search_button">検索</button>
+        <button id="search_clear_btn">クリア</button>
+      </div>
+    
+      <div id="user_searh_result">
+    
       </div>
 
 
