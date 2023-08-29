@@ -238,7 +238,8 @@ function clear_child_elems(elem) {
 function show_recving_request(result) {
     toastr["info"]("フレンドリクエストを受信しました","通知",{disableTimeOut: true, closeButton:true,timeOut : "0",extendedTimeOut : "0"});
     window.navigator.vibrate(200); 
-    show_friend_request(result.sender_id,result.username,result.requestid,recved_request_show_area);
+    send_command("get_sended_request",{});
+    //show_friend_request(result.sender_id,result.username,result.requestid,recved_request_show_area);
 }
 
 //受信済みフレンドリクエストを表示する
@@ -270,6 +271,7 @@ function request_already_sended(result) {
 function show_friend_request(senderid,username,requestid,showdiv) {
     //結果のdiv
     let add_div = document.createElement("div");
+    add_div.classList.add("recved_request_area");
 
     /*ID表示
     let sender_userid_area = document.createElement("p");
@@ -350,12 +352,7 @@ function show_sended_friend_requests(result) {
         //結果のdiv
         let add_div = document.createElement("div");
         add_div.classList.add("sended_request_area");
-
-        //承認コード表示
-        let verify_code_userid_area = document.createElement("p");
-        verify_code_userid_area.textContent = "承認コード : " + verify_code;
-        add_div.appendChild(verify_code_userid_area);
-
+        
         //ID表示
         let username_area = document.createElement("p");
         username_area.textContent = "ユーザー名 : " + username;
@@ -363,12 +360,19 @@ function show_sended_friend_requests(result) {
         //追加
         add_div.appendChild(username_area);
 
+
+        //承認コード表示
+        let verify_code_userid_area = document.createElement("p");
+        verify_code_userid_area.textContent = "承認コード : " + verify_code;
+        add_div.appendChild(verify_code_userid_area);
+
         //承認ボタン
         let cancel_btn = document.createElement("input");
         cancel_btn.type = "button";
         cancel_btn.value = "取り消し";
         cancel_btn.requestid = requestid;
         cancel_btn.base_div = add_div;
+        cancel_btn.classList.add("meecha_btn");
 
         //イベント登録
         cancel_btn.addEventListener("click",cancel_friend_request);
@@ -408,7 +412,7 @@ function show_friend(result) {
         remove_btn.value = "フレンド削除";
         remove_btn.friendid = val["friendid"];
         remove_btn.base_div = add_div;
-        remove_btn.classList.add("memo_btn");
+        remove_btn.classList.add("meecha_btn");
 
         //イベント登録
         remove_btn.addEventListener("click",remove_friend);
@@ -433,7 +437,7 @@ function show_friend(result) {
         memo_btn.friendid = val["friendid"];
         memo_btn.friend_userid = val["friend_userid"];
         memo_btn.memo_text_area = memo_area;
-        memo_btn.classList.add("memo_btn");
+        memo_btn.classList.add("meecha_btn");
         //イベント登録
         memo_btn.addEventListener("click",update_memo);
         //friend_memo_area.append(memo_btn);
@@ -557,6 +561,7 @@ function show_search_result(result) {
         
         request_btn.userid = userid;
         request_btn.value = "フレンドリクエスト";
+        request_btn.classList.add("meecha_btn");
 
         //イベント登録
         if (result[userid].is_friend == "0") {

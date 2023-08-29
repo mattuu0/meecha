@@ -144,8 +144,20 @@ button{
   margin: 10px auto;
 }
 
+.sended_request_area * {
+  margin: 3px;
+}
+
 .sended_request_area {
-  margin: 0px;
+  border-bottom: #000 1px dotted;
+}
+
+.recved_request_area * {
+  margin: 3px;
+}
+
+.recved_request_area {
+  border-bottom: #000 1px dotted;
 }
 
 .meecha_button {
@@ -163,12 +175,13 @@ button{
   align-content: stretch;
 }
 
-.memo_btn {
+.meecha_btn {
   font-family: 'Zen Maru Gothic', sans-serif;
   background-color: #5da38ccc;
   border: 0;
   margin: 10px;
 }
+
 
 .friend_info * {
   margin: 3px;
