@@ -1,0 +1,13 @@
+/* ポップアップ */
+.popup {
+    position: fixed;
+    left: 15vw;
+    top: 15vh;
+    z-index: 9999;
+    opacity: 0;
+    visibility: hidden;
+}
+.popup.is-show {
+    opacity: 1;
+    visibility: visible;
+}
