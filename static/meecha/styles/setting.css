@@ -74,6 +74,16 @@ button{
   height: 9vw;
 }
 
+.friends_button button{
+  color: #038da2;
+}
+
+.friends_button div{
+  font-size: 1em;
+  margin-bottom: 10px;
+  margin-left: 18vw;
+}
+
 .set img{
   width: 10vw;
   height: 10vw;
