@@ -82,53 +82,76 @@
     <div id="friends_area">          
       <div class="friends_button">
           <div>
-              <button popovertarget="friends_area" id="get_friends_button" class="button_radius">
+              <button id="get_friends_button" class="button_radius">
                   フレンド一覧
               </button>
           </div>
 
           <div>
-            <button popovertarget="friends_area" id="get_friends_button" class="button_radius">
-                ユーザー検索
-            </button>
-        </div>
+              <button id="get_friends_button" class="button_radius">
+                  ユーザー検索
+              </button>
+          </div>
 
           <div>
-              <button popovertarget="recved_request_area" id="get_request_button" class="button_radius">
+              <button id="get_request_button" class="button_radius">
                   受信済み
               </button>
           </div>
       
           <div>
-              <button popovertarget="sended_request_area" id="sended_request_button" class="button_radius">
+              <button id="sended_request_button" class="button_radius">
                   送信済み
               </button>
           </div>
 
       </div>
 
-      <div id="popup" class="popup">
+      <div id="show_recved_request_area" class="popup">
+        <div class="popup_inner">
           <div id="recved_request_area" class="popover">
             <p>受信済みリクエスト</p>
             <div id="recved_request_show_area">
               
             </div>
+          </div>
         </div>
       </div>
 
-      <div id="sended_request_area">
-          <p>送信済みリクエスト</p>
-          <div id="sended_request_show_area">
+      <div id="show_sended_request_area" class="popup">
+        <div class="popup_inner">
+          <div id="sended_request_area" class="popover">
+              <p>送信済みリクエスト</p>
+              <div id="sended_request_show_area">
 
+              </div>
           </div>
+        </div>
+      </div>
+
+      <div id="pupup_friends_show_area" class="popup">
+        <div class="popup_inner">
+          <div id="friends_area" class="popover">
+            <p>フレンド一覧</p>
+            <div id="friends_show_area">
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="user_search_area">
+        <input type="text" placeholder="ユーザー名" id="search_username_value">
+        <button id="user_search_button">検索</button>
+        <button id="search_clear_btn">クリア</button>
+      </div>
+    
+      <div id="user_searh_result">
+    
       </div>
 
 
-      <div id="friends_area">
-          <p>フレンド一覧</p>
-          <div id="friends_show_area">
-
+            </div>
           </div>
+        </div>
       </div>
   </div>
   </main>
@@ -143,5 +166,6 @@
   <link rel="stylesheet" href="{% static 'meecha/leaflet/leaflet.css' %}">
   <link rel="stylesheet" href="{% static 'meecha/styles/popup.css' %}">
   <script src="{% static 'meecha/scripts/setting.js' %}"></script>
+  <script src="{% static 'meecha/scripts/popup.js' %}"></script>
 </body>
 </html>
