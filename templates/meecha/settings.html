@@ -35,21 +35,28 @@
     <div class="set">
 
       <div class="distance menu">
-        <div class="setting_elements"><img src="{% static 'meecha/images/distance.png' %}" alt=""></div>
-        <button popovertarget="setting_distance" class="setting_notify_distance">通知する距離</button>
-        <div id="setting_distance" popover class="popover">
-          <p id="distance_show">現在は()mで通知します</p>
-          <select name="distances" class="distanec_select" id="notify_distances_select">
-            <option hidden>通知する距離を選択 (m)</option>
-            <option value="5">  5   m</option>
-            <option value="10">  10   m</option>
-            <option value="50">  50   m</option>
-            <option value="250"> 250  m</option>
-            <option value="500"> 500  m</option>
-            <option value="1000">1000 m</option>
-            <option value="3000">3000 m</option>
-            <option value="5000">5000 m</option>
-          </select>
+        <div class="setting_elements">
+          <img src="{% static 'meecha/images/distance.png' %}" alt="">
+        </div>
+        <button id="setting_notify_distance" class="setting_notify_distance">通知する距離</button>
+      </div>
+
+      <div id="setting_distance_area" class="popup">
+        <div class="popup_inner">
+          <div id="setting_distance" class="popover">
+            <p id="distance_show">現在は()mで通知します</p>
+            <select name="distances" class="distanec_select" id="notify_distances_select">
+              <option hidden>通知する距離を選択 (m)</option>
+              <option value="5">  5   m</option>
+              <option value="10">  10   m</option>
+              <option value="50">  50   m</option>
+              <option value="250"> 250  m</option>
+              <option value="500"> 500  m</option>
+              <option value="1000">1000 m</option>
+              <option value="3000">3000 m</option>
+              <option value="5000">5000 m</option>
+            </select>
+          </div>
         </div>
       </div>
 
