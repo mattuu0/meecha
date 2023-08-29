@@ -330,16 +330,6 @@ function show_friend_request(senderid,username,requestid,showdiv) {
     }
 }
 
-//取得した受信済みフレンドリクエストを表示する
-/*
-function show_friend_requests(result) {
-    clear_child_elems(recved_request_show_area);
-
-    for (let requestid in result) {
-        show_friend_request(result[requestid].sender_id,result[requestid].user_name,requestid,recved_request_show_area);
-    }
-}
-*/
 
 //取得した送信済みフレンドリクエストを表示する
 function show_sended_friend_requests(result) {
@@ -390,14 +380,6 @@ function show_friend(result) {
         //結果のdiv
         let add_div = document.createElement("div");
         add_div.classList.add("friend_info");
-
-        /*ID表示
-        let sender_userid_area = document.createElement("p");
-        sender_userid_area.textContent = "ID : " + val["friend_userid"];
-
-        //追加
-        add_div.appendChild(sender_userid_area);
-        */
 
         //ID表示
         let username_area = document.createElement("p");
@@ -537,15 +519,6 @@ function show_search_result(result) {
     for (let userid in result) {
         //結果のdiv
         let add_div = document.createElement("div");
-
-        /*
-        //ID表示
-        let userid_area = document.createElement("p");
-        userid_area.textContent = "ユーザーID : " + userid;
-
-        //追加
-        add_div.appendChild(userid_area);
-        */
 
         let user_div = document.createElement("div");
         user_div.classList.add("accpet_area");

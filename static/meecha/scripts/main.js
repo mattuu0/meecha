@@ -167,11 +167,13 @@ function init(evt) {
     }
 
     //イベント登録
+    /*
     search_button.addEventListener("click",search_user);
     get_recved_request_button.addEventListener("click",get_friend_request);
     get_sended_request_button.addEventListener("click",get_sended_friend_request);
     get_friends_btn.addEventListener("click",get_friends);
     clear_search_btn.addEventListener("click",clear_friend_search);
+    */
 }
 
 window.onload = init;
