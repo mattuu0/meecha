@@ -35,15 +35,6 @@ a:visited{
   color: #00525f;
 }
 
-.popover{
-  width: 60vw;
-  height: 60vh;
-  background-color: #e9fef7ef;
-  border: 2px solid #5da38ccc;
-  border-radius: 10px;
-  text-align: center;
-}
-
 button{
   font-family: 'Zen Maru Gothic', sans-serif;
   background-color: rgba(0, 0, 0, 0);
@@ -68,38 +59,19 @@ button{
   margin: 0 5%;
 }
 
-.menu{
+.password,.logout,.distance{
   display: flex;
   align-items: center;
   margin-bottom: 20px;
 }
 
 .logout{
-  margin-left: 1%; 
-}
-
-.friends{
-  margin-bottom: 10px;
-}
-
-.friends img{
-  width: 10vw;
-  height: 9vw;
+  margin-left: 2%; 
 }
 
 .set img{
   width: 10vw;
   height: 10vw;
-}
-
-.friends_button button{
-  color: #038da2;
-}
-
-.friends_button div{
-  font-size: 1em;
-  margin-bottom: 10px;
-  margin-left: 18vw;
 }
 
 .arrow{

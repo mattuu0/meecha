@@ -11,3 +11,13 @@
     opacity: 1;
     visibility: visible;
 }
+
+.popover{
+    width: 60vw;
+    height: 60vh;
+    background-color: #e9fef7ef;
+    border: 2px solid #5da38ccc;
+    border-radius: 10px;
+    text-align: center;
+}
+
