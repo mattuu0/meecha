@@ -1,0 +1,116 @@
+@import url('https://fonts.googleapis.com/css2?family=Monomaniac+One&family=Zen+Maru+Gothic:wght@700&display=swap');
+
+body {
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  color: #00525f;
+  background-color: #f0fffa;
+  font-family: 'Zen Maru Gothic', sans-serif;
+  font-size: 1em;
+}
+
+main{
+  margin-top: 50px;
+}
+
+#rogo{
+  width: 100px;
+  position: fixed;
+  top:10px;
+  left: 10px;
+  z-index: 1;
+}
+
+a{
+  text-decoration: none;
+  margin:  0;
+}
+
+a:link{
+  color: #00525f;
+}
+
+a:visited{
+  color: #00525f;
+}
+
+.popover{
+  width: 60vw;
+  height: 60vh;
+  background-color: #e9fef7ef;
+  border: 2px solid #5da38ccc;
+  border-radius: 10px;
+  text-align: center;
+}
+
+button{
+  font-family: 'Zen Maru Gothic', sans-serif;
+  background-color: rgba(0, 0, 0, 0);
+  color: #00525f;
+  border: none;
+  border-radius: 8px;
+  justify-content: center;
+  align-items: center;
+  font-size: 1em;
+}
+
+.user_info{
+  text-align: center;
+}
+
+.user_info img{
+  width: 20vw;
+  border-radius: 50%;
+}
+
+.setting_elements{
+  margin: 0 5%;
+}
+
+.menu{
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.logout{
+  margin-left: 1%; 
+}
+
+.friends{
+  margin-bottom: 10px;
+}
+
+.friends img{
+  width: 10vw;
+  height: 9vw;
+}
+
+.set img{
+  width: 10vw;
+  height: 10vw;
+}
+
+.friends_button button{
+  color: #038da2;
+}
+
+.friends_button div{
+  font-size: 1em;
+  margin-bottom: 10px;
+  margin-left: 18vw;
+}
+
+.arrow{
+  width: 15vw;
+  position: fixed;
+  bottom: 10px;
+}
+
+.distanec_select {
+  margin: auto;
+  width: 90%;
+  margin-top: 25px;
+  padding: 1.5em 1.2em;
+}
