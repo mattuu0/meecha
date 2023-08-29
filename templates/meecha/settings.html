@@ -86,12 +86,13 @@
           </div>
 
       </div>
-
-      <div id="recved_request_area" popover class="popover">
-          <p>受信済みリクエスト</p>
-          <div id="recved_request_show_area">
-          
-          </div>
+      <div id="popup" class="popup">
+          <div id="recved_request_area" class="popover">
+            <p>受信済みリクエスト</p>
+            <div id="recved_request_show_area">
+              
+            </div>
+        </div>
       </div>
 
       <div id="sended_request_area" popover class="popover">
@@ -118,6 +119,7 @@
   <script src="{% static 'meecha/scripts/js.cookie.min.js' %}"></script>
   <script src="{% static 'meecha/leaflet/leaflet.js' %}"></script>
   <link rel="stylesheet" href="{% static 'meecha/leaflet/leaflet.css' %}">
+  <link rel="stylesheet" href="{% static 'meecha/styles/popup.css' %}">
   <script src="{% static 'meecha/scripts/setting.js' %}"></script>
 </body>
 </html>

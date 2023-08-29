@@ -138,7 +138,8 @@ let distance_show_area = document.getElementById("distance_show");
 
 select_box.addEventListener("change",change_distance);
 
-
+let popup = document.getElementById('popup');
+//popup.classList.toggle('is-show');
 //追加機能
 
 //検索ボタン
@@ -174,6 +175,7 @@ const friend_show_view = document.getElementById("friends_area");
 //マップを追跡させるか
 const clear_search_btn = document.getElementById("search_clear_btn");
 
+
 function init(evt) {
     //オブジェクト取得
     
@@ -183,11 +185,11 @@ function init(evt) {
     }
 
     //イベント登録
-    search_button.addEventListener("click",search_user);
+    //search_button.addEventListener("click",search_user);
     get_recved_request_button.addEventListener("click",get_friend_request);
     get_sended_request_button.addEventListener("click",get_sended_friend_request);
     get_friends_btn.addEventListener("click",get_friends);
-    clear_search_btn.addEventListener("click",clear_friend_search);
+    //clear_search_btn.addEventListener("click",clear_friend_search);
 }
 
 window.onload = init;
