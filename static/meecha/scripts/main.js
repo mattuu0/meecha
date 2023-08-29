@@ -1,3 +1,22 @@
+//トースター初期化
+toastr.options = {
+    "closeButton": true,
+    "debug": false,
+    "newestOnTop": true,
+    "progressBar": true,
+    "positionClass": "toast-top-center",
+    "preventDuplicates": false,
+    "onclick": null,
+    "showDuration": "300",
+    "hideDuration": "1000",
+    "timeOut": "3000",
+    "extendedTimeOut": "1000",
+    "showEasing": "swing",
+    "hideEasing": "linear",
+    "showMethod": "fadeIn",
+    "hideMethod": "fadeOut"
+}
+
 //マップ設定
 const main_map = L.map('show_map')
 
@@ -7,8 +26,10 @@ var tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
 
 tileLayer.addTo(main_map);
 //各ユーザーのピン
-var user_pins = {};
+var friends_pins = {};
 var myself_marker = null;
+var myself_position = [0,0];
+var myself_init = false;
 
 //Websockeet
 let ws_conn;
@@ -16,8 +37,8 @@ var ws_connected = false;
 
 function connect_ws() {
     //Websocketに接続
-    ws_conn = new WebSocket('ws://' + window.location.host + '/ws/connect');
-   
+    //ws_conn = new WebSocket('ws://' + window.location.host + '/ws/connect');
+    ws_conn = new WebSocket('wss://' + window.location.hostname + ':11113/ws/connect');
 
     ws_conn.onmessage = function(evt) {
         const parse_data = JSON.parse(evt.data);
@@ -43,29 +64,55 @@ function connect_ws() {
                     case "friends_response":
                         show_friend(msg_data.friends);
                         break;
+                    case "request_already_sended":
+                        request_already_sended(msg_data.send_id);
+                        break;
+                    case "already_friend":
+                        toastr["error"]("既にフレンドです");
+                        break;
+                    case "success_update_memo":
+                        toastr["info"]("メモを更新しました");
+                        break;
+                    case "success_remove_friend":
+                        toastr["info"]("フレンドを削除しました");
+                        break;
+                    case "accepted_friend_request":
+                        toastr["info"]("フレンドリクエストが承認されました");
+                        break;
+                    case "success_reject_request":
+                        toastr["info"]("フレンドリクエストを拒否しました");
+                        break;
+                    case "accept_friend_request":
+                        toastr["info"]("フレンドリクエストを承認しました");
+                        break;
+                    case "near_friend_notify":
+                        show_near_friend(msg_data);
+                        break;
+                    case "remove_map_pin":
+                        remove_mappin(msg_data.userid);
+                        break;
+                    case "request_accpet_error":
+                        toastr["error"]("承認に失敗しました");
+                        break;
                     default:
                         console.log(msg_data);
                         break;
                 }
                 break;
         }
-
-        
     };
         
     ws_conn.onclose = function(evt) {
         console.error('socket closed unexpectedly');
         ws_connected = false;
-
-        console.log('Socket is closed. 3秒後に再接続します。', event.reason);
-        setTimeout(() => {
-            connect_ws();
-        }, 3000);
+        
+        toastr["warning"]("サーバーとの接続が切断しました、再接続するにはリロードしてください","通知",{disableTimeOut: true, closeButton:true,timeOut : "0",extendedTimeOut : "0"});
     };
 
     ws_conn.onopen = function(evt) {
         ws_connected = true;
-        console.log("接続しました")
+        console.log("接続しました");
+        toastr["info"]("接続しました","通知");
     }
 }
 
@@ -98,8 +145,14 @@ const get_friends_btn = document.getElementById("get_friends_button");
 //フレンド表示場所
 const friend_show_area = document.getElementById("friends_show_area");
 
+//フレンドビュー
+const friend_show_view = document.getElementById("friends_area");
+
 //マップを追跡させるか
 const auto_change_map_check = document.getElementById("auto_change_map");
+
+//マップを追跡させるか
+const clear_search_btn = document.getElementById("search_clear_btn");
 
 function init(evt) {
     //オブジェクト取得
@@ -114,6 +167,7 @@ function init(evt) {
     get_recved_request_button.addEventListener("click",get_friend_request);
     get_sended_request_button.addEventListener("click",get_sended_friend_request);
     get_friends_btn.addEventListener("click",get_friends);
+    clear_search_btn.addEventListener("click",clear_friend_search);
 }
 
 window.onload = init;
@@ -126,10 +180,53 @@ function clear_child_elems(elem) {
     }
 }
 
+//ピンを削除する
+function remove_mappin(userid) {
+    if (userid in friends_pins) {
+        var friend_data = friends_pins[userid];
+
+        main_map.removeLayer(friend_data["pin"]);
+
+        delete friends_pins[userid];
+    }
+}
+
+//近くのフレンドを表示する
+function show_near_friend(data) {
+    if (data["userid"] in friends_pins) {
+        var friend_data = friends_pins[data["userid"]];
+
+        console.log(data["geodata"][0],data["geodata"][1]);
+        friend_data["pin"].setLatLng([data["geodata"][0],data["geodata"][1]]);
+    } else {
+        var friend_data = {};
+
+        var friend_pin = L.marker([data["geodata"][0],data["geodata"][1]],{icon: L.spriteIcon('red')}).addTo(main_map).bindPopup(data["username"]);
+
+        friend_data["pin"] = friend_pin;
+        
+        friends_pins[data["userid"]] = friend_data;
+    }
+
+    if (data["show_notify"]) {
+        toastr["info"](data["username"] + "さんが近くにいます！","通知",{disableTimeOut: true, closeButton:true,timeOut : "0",extendedTimeOut : "0"});
+        if(window.navigator.vibrate){
+            window.navigator.vibrate([200]);
+        }else if(window.navigator.mozVibrate){
+            window.navigator.mozVibrate([200]);
+        }else if(window.navigator.webkitVibrate){
+            window.navigator.webkitVibrate([200]);
+        }else{
+            
+        }
+    }
+}
+
 //受信したフレンドリクエストを表示する
 function show_recving_request(result) {
+    toastr["info"]("フレンドリクエストを受信しました","通知",{disableTimeOut: true, closeButton:true,timeOut : "0",extendedTimeOut : "0"});
+    window.navigator.vibrate(200); 
     show_friend_request(result.sender_id,result.username,result.requestid,recved_request_show_area);
-
 }
 
 //受信済みフレンドリクエストを表示する
@@ -147,17 +244,23 @@ function show_recved_requests(result) {
     }
 }
  
+//既に送信済みの場合エラーを出す
+function request_already_sended(result) {
+    toastr["error"]("フレンドリクエストを既に送信しています");
+}
+
 //フレンドリクエストを表示する
 function show_friend_request(senderid,username,requestid,showdiv) {
     //結果のdiv
     let add_div = document.createElement("div");
 
-    //ID表示
+    /*ID表示
     let sender_userid_area = document.createElement("p");
     sender_userid_area.textContent = "ID : " + senderid;
 
     //追加
     add_div.appendChild(sender_userid_area);
+    */
 
     //ID表示
     let username_area = document.createElement("p");
@@ -171,6 +274,7 @@ function show_friend_request(senderid,username,requestid,showdiv) {
     accept_btn.type = "button";
     accept_btn.value = "承認";
     accept_btn.requestid = requestid;
+    accept_btn.base_div = add_div;
 
     //イベント登録
     accept_btn.addEventListener("click",accept_friend_request);
@@ -181,6 +285,7 @@ function show_friend_request(senderid,username,requestid,showdiv) {
     reject_btn.type = "button";
     reject_btn.value = "拒否";
     reject_btn.requestid = requestid;
+    reject_btn.base_div = add_div;
 
     //イベント登録
     reject_btn.addEventListener("click",reject_friend_request);
@@ -204,18 +309,17 @@ function show_sended_friend_requests(result) {
     clear_child_elems(sended_request_show_area);
 
     for (let requestid in result) {
-        let senderid = result[requestid].sender_id;
+        let verify_code = result[requestid].verify_code;
         let username = result[requestid].user_name;
 
         //結果のdiv
         let add_div = document.createElement("div");
+        add_div.classList.add("sended_request_area");
 
-        //ID表示
-        let sender_userid_area = document.createElement("p");
-        sender_userid_area.textContent = "ID : " + senderid;
-
-        //追加
-        add_div.appendChild(sender_userid_area);
+        //承認コード表示
+        let verify_code_userid_area = document.createElement("p");
+        verify_code_userid_area.textContent = "承認コード : " + verify_code;
+        add_div.appendChild(verify_code_userid_area);
 
         //ID表示
         let username_area = document.createElement("p");
@@ -229,6 +333,7 @@ function show_sended_friend_requests(result) {
         cancel_btn.type = "button";
         cancel_btn.value = "取り消し";
         cancel_btn.requestid = requestid;
+        cancel_btn.base_div = add_div;
 
         //イベント登録
         cancel_btn.addEventListener("click",cancel_friend_request);
@@ -246,12 +351,13 @@ function show_friend(result) {
         //結果のdiv
         let add_div = document.createElement("div");
 
-        //ID表示
+        /*ID表示
         let sender_userid_area = document.createElement("p");
         sender_userid_area.textContent = "ID : " + val["friend_userid"];
 
         //追加
         add_div.appendChild(sender_userid_area);
+        */
 
         //ID表示
         let username_area = document.createElement("p");
@@ -266,6 +372,7 @@ function show_friend(result) {
         remove_btn.type = "button";
         remove_btn.value = "フレンド削除";
         remove_btn.friendid = val["friendid"];
+        remove_btn.base_div = add_div;
 
         //イベント登録
         remove_btn.addEventListener("click",remove_friend);
@@ -321,13 +428,14 @@ function accept_friend_request(evt) {
     //ユーザーID
     let send_id = evt.target.requestid;
 
-    send_command("accept_request",{requestid:send_id});
+    send_command("accept_request",{requestid:send_id,verify_code:"00000"});
 }
 
 //フレンドを削除
 function remove_friend(evt) {
     //ユーザーID
     let send_id = evt.target.friendid;
+    evt.target.base_div.remove();
 
     send_command("remove_friend",{friendid:send_id});
 }
@@ -347,6 +455,7 @@ function update_memo(evt) {
 function reject_friend_request(evt) {
     //ユーザーID
     let send_id = evt.target.requestid;
+    evt.target.base_div.remove();
 
     send_command("reject_request",{requestid:send_id});
 }
@@ -355,9 +464,17 @@ function reject_friend_request(evt) {
 function cancel_friend_request(evt) {
     //ユーザーID
     let send_id = evt.target.requestid;
+    evt.target.base_div.remove();
 
     send_command("cancel_request",{requestid:send_id});
 }
+
+
+//フレンド検索結果を削除する
+function clear_friend_search(evt) {
+    clear_child_elems(search_result_area);
+}
+
 
 //検索結果表示
 function show_search_result(result) {
@@ -367,19 +484,23 @@ function show_search_result(result) {
         //結果のdiv
         let add_div = document.createElement("div");
 
+        /*
         //ID表示
         let userid_area = document.createElement("p");
-        userid_area.textContent = "ID : " + userid;
+        userid_area.textContent = "ユーザーID : " + userid;
 
         //追加
         add_div.appendChild(userid_area);
+        */
 
+        let user_div = document.createElement("div");
+        user_div.classList.add("accpet_area");
         //ID表示
         let username_area = document.createElement("p");
         username_area.textContent = "ユーザー名 : " + result[userid].user_name;
 
         //追加
-        add_div.appendChild(username_area);
+        user_div.appendChild(username_area);
         
         let request_btn = document.createElement("input");
         request_btn.type = "button";
@@ -396,7 +517,9 @@ function show_search_result(result) {
             request_btn.disabled = true;
         }
 
-        add_div.append(request_btn);
+        user_div.append(request_btn);
+
+        add_div.append(user_div);
         search_result_area.appendChild(add_div);
     }
 }
@@ -422,6 +545,8 @@ function get_sended_friend_request(evt) {
 //フレンド一覧を取得する
 function get_friends(evt) {
     send_command("get_friends",{});
+
+    friend_show_view.style.display = "absolute";
 }
 
 //位置情報取得
@@ -430,6 +555,7 @@ var id, target, options;
 function success(pos) {
     var crd = pos.coords;
 
+    
     //マーカーが設定されていなかったら現在地に打つ
     if (myself_marker == null) {
         main_map.setView([crd.latitude,crd.longitude],15);
@@ -450,10 +576,28 @@ function success(pos) {
         main_map.setView([crd.latitude,crd.longitude],main_map.getZoom());
     }
 
+    myself_position[0] = crd.latitude;
+    myself_position[1] = crd.longitude;
+
+    if (myself_init) {
+        return;
+    }
+
+    setTimeout(() => {
+        post_loop()
+    }, 3000);
+    myself_init = true;
+}
+
+function post_loop() {
     send_command("post_location",{
-        latitude : crd.latitude,
-        longitude : crd.longitude
+        latitude : myself_position[0],
+        longitude : myself_position[1]
     });
+
+    setTimeout(() => {
+        post_loop()
+    }, 3000);
 }
 
 function error(err) {
@@ -475,3 +619,5 @@ function start_gps() {
 }
 
 start_gps();
+
+screen.orientation.lock();

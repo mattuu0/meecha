@@ -65,8 +65,17 @@ button,input[type = button]{
 .menu_button{
     width: 100vw;
     display: flex;
-    
-    bottom: 50px;
+    position: fixed;
+    bottom: 70px;
+    margin: auto;
+    align-content: stretch;
+}
+
+.demo_menu_button{
+    width: 100vw;
+    display: flex;
+    position: fixed;
+    bottom: 20px;
     margin: auto;
     align-content: stretch;
 }
@@ -78,7 +87,7 @@ button,input[type = button]{
 
 .map_area {
     width: 100vw;
-    height: 70vh;
+    height: 60vh;
     z-index: 100;
     margin: 20px 0;
 }
@@ -94,7 +103,6 @@ footer{
     border: 2px solid #5da38ccc;
     border-radius: 10px;
 }
-
 
 .memo_update{
     margin: 3px 5px;
@@ -118,8 +126,4 @@ footer{
 .auto_move_check {
     text-align: center;
     margin: 10px auto;
-}
-
-.sended_request_area {
-    margin: 0px;
 }

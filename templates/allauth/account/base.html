@@ -1,5 +1,6 @@
 {% load i18n %}
 {% load django_bootstrap5 %}
+{% load static %}
 
 <!DOCTYPE html>
 
@@ -11,12 +12,18 @@
 
         {% bootstrap_css %}
         {% bootstrap_javascript %}
+
+        <link rel="stylesheet" href="{% static 'meecha/styles/base.css' %}">
         {% block extra_head %}
+
         {% endblock %}
     </head>
     <body>
-        {% block body %}
+        {% block body %}        
         <nav class="navbar navbar-expand-sm navbar-light bg-light">
+            <a class="nav-link mx-5" id="logo" href="/meecha" class="nav-link">
+                <img src="{% static 'meecha/images/meecha.png' %}" alt="" width="145" height="25">
+            </a>
             <div class="container-fluid">
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -24,18 +31,16 @@
                 <div class="collapse navbar-collapse justify-content-end" id="navbarSupportedContent">
                     <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                         {% if user.is_authenticated %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'account_email' %}" class="nav-link">{% trans "Change E-mail" %}</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'account_logout' %}" class="nav-link">{% trans "Sign Out" %}</a>
+                        <li class="nav-item d-flex flex-row">
+                            <a class="nav-link mx-5" href="{% url 'account_logout' %}" class="nav-link">{% trans "Sign Out" %}</a>
+                            <a class="nav-link mx-5" href="{% url 'account_change_password' %}" class="nav-link">{% trans "Change Password" %}</a>
                         </li>
                         {% else %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'account_login' %}" class="nav-link">{% trans "Sign In" %}</a>
+                        <li class="nav-item d-flex flex-row">
+                            <a class="nav-link mx-5" href="{% url 'account_login' %}" class="nav-link">{% trans "Sign In" %}</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'account_signup' %}" class="nav-link">{% trans "Sign Up" %}</a>
+                            <a class="nav-link mx-5" href="{% url 'account_signup' %}" class="nav-link">{% trans "Sign Up" %}</a>
                         </li>
                         {% endif %}
                     </ul>
@@ -45,7 +50,6 @@
 
         {% if messages %}
         <div>
-            <strong>{% trans "Messages:" %}</strong>
             <ul>
                 {% for message in messages %}
                 <li>{{message}}</li>

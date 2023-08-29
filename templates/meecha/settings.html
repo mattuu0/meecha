@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="{% static 'meecha/styles/setting.css' %}">
+
+  <script src="https://code.jquery.com/jquery-3.7.0.min.js" integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g=" crossorigin="anonymous"></script>
+  <script src="{% static 'meecha/scripts/check_mobile.js' %}"></script>
+  <script src="{% static 'meecha/scripts/toastr.min.js' %}"></script>
+  <link rel="stylesheet" href="{% static 'meecha/styles/toastr.min.css' %}">
+  <title>設定</title>
+
+</head>
+<body>
+  {% csrf_token %}
+
+  <header>
+    <a href="/meecha">
+      <img src="{% static 'meecha/images/meecha.png' %}" alt="" id="rogo">
+    </a>
+  </header>
+  <main>
+    
+    
+    {% if request.user.is_authenticated %}
+      <div class="user_info">
+        <img src="{% static 'meecha/images/icon.jpg' %}" alt="" >
+        <p>{{ request.user.username }}</p>
+      </div>
+      {% else %}
+        <p>ログインしていません</p>
+      {% endif %}
+
+    <div class="set">
+
+      <div class="distance">
+        <div class="setting_elements"><img src="{% static 'meecha/images/distance.png' %}" alt=""></div>
+        <button popovertarget="setting_distance" class="setting_notify_distance">通知する距離</button>
+        <div id="setting_distance" popover class="popover">
+          <p id="distance_show">現在は()mで通知します</p>
+          <select name="distances" class="distanec_select" id="notify_distances_select">
+            <option hidden>通知する距離を選択 (m)</option>
+            <option value="5">  5   m</option>
+            <option value="10">  10   m</option>
+            <option value="50">  50   m</option>
+            <option value="250"> 250  m</option>
+            <option value="500"> 500  m</option>
+            <option value="1000">1000 m</option>
+            <option value="3000">3000 m</option>
+            <option value="5000">5000 m</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="password">
+        <div class="setting_elements"><img src="{% static 'meecha/images/password.png' %}" alt=""></div>
+        <div ><a href="/accounts/password/change/">パスワード変更</a></div>
+      </div>
+      
+      <div class="logout">
+        <div class="setting_elements"><img src="{% static 'meecha/images/logout.png' %}" alt=""></div>
+        <div><a href="/accounts/logout">ログアウト</a></div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <a href="/meecha"><img src="{% static 'meecha/images/arrow.png' %}" alt="" class="arrow"></a>
+  </footer>
+  
+  <script src="{% static 'meecha/scripts/js.cookie.min.js' %}"></script>
+  <script src="{% static 'meecha/leaflet/leaflet.js' %}"></script>
+  <link rel="stylesheet" href="{% static 'meecha/leaflet/leaflet.css' %}">
+  <script src="{% static 'meecha/scripts/setting.js' %}"></script>
+</body>
+</html>

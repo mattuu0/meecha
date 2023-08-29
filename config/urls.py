@@ -16,9 +16,10 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path,include
-from accounts.views import get_user_info
+from accounts.views import get_user_info,redirect_login
 
 urlpatterns = [
+    path('',redirect_login),
     path('admin/', admin.site.urls),
     path('meecha/', include('meecha.urls')),
     path('accounts/', include('allauth.urls')),

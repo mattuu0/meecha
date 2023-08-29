@@ -49,7 +49,8 @@ INSTALLED_APPS = [
     'accounts.apps.AccountsConfig',
     'allauth',     
     'allauth.account',     
-    'allauth.socialaccount'
+    'allauth.socialaccount',
+    'sslserver',
 ]
 
 MIDDLEWARE = [
@@ -60,6 +61,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -156,11 +158,15 @@ AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',  # 管理サイト用(ユーザー名認証)
 )
  
-ACCOUNT_AUTHENTICATION_METHOD = 'email'  # メールアドレス認証に変更する設定
-ACCOUNT_USERNAME_REQUIRED = False  # サインナップ、ログイン時のユーザーネーム認証をキャンセル
+ACCOUNT_USERNAME_REQUIRED = True  # サインナップ、ログイン時のユーザーネーム認証をキャンセル
+ACCOUNT_AUTHENTICATION_METHOD = 'username'
  
-ACCOUNT_EMAIL_VERIFICATION = 'mandatory'  # サインアップにメールアドレス確認を使用
-ACCOUNT_EMAIL_REQUIRED = True
+
+ACCOUNT_EMAIL_VERIFICATION = 'none'  # サインアップにメールアドレス確認を使用
+ACCOUNT_EMAIL_REQUIRED = False
+EMAIL_REQUIRED = False
+ACCOUNT_USER_MODEL_EMAIL_FIELD = None
+
  
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend' # ローカルでの開発のためメールをコンソールで表示する
  
@@ -171,15 +177,15 @@ ACCOUNT_LOGOUT_ON_GET = True  # 確認を行わずログアウトする設定
 
 #Websocket関連
 ASGI_APPLICATION = "meecha.asgi.application"
-...
+
+
 CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels_redis.core.RedisChannelLayer",
-        "CONFIG": {
-            "hosts": [("127.0.0.1", 6379)],
-        },
+    'default': {
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
     },
 }
+
+ALLOWED_HOSTS = ["*"]
 
 """
 DATABASES = {
@@ -192,4 +198,12 @@ DATABASES = {
          'PORT': '5432',
      }
 }
+
+CHANNEL_LAYERS = {
+    'default': {
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
+    },
+}
+
+
 """

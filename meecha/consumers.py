@@ -3,11 +3,13 @@ import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 from accounts.models import CustomUser
 from asgiref.sync import sync_to_async
-from .models import Friend_data,Friend_request,Geo_Data
+from .models import Friend_data,Friend_request,Geo_Data,user_setting
 from uuid import UUID,uuid4
 from django.db.models import Q
 from geopy.distance import geodesic
-import datetime,time
+import logging
+
+default_distance = 5000
 
 class ChatConsumer(AsyncWebsocketConsumer):
     user_searching = False
@@ -21,7 +23,12 @@ class ChatConsumer(AsyncWebsocketConsumer):
             await self.close()
             return
 
+        #フレンド設定を初期化する
+        await self.init_friend(user)
+
         room_id = str(user.userid)
+
+        await self.init_user(user)
 
         await self.accept()
 
@@ -127,7 +134,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
                             "requestid":str(registerd_request.dataid),
                             "sender_id":str(user.userid),
                             "username" :str(user.username),
-                            "timestamp":str(registerd_request.timestamp.strftime("%Y/%m/%d %H:%M:%S"))
+                            "timestamp":str(registerd_request.timestamp.strftime("%Y/%m/%d %H:%M:%S")),
+                            "verify_code" : str(registerd_request.verify_code)
                         }
                     }
 
@@ -159,7 +167,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             
         elif command == "accept_request":
             #フレンドリクエスト承認
-            is_success,friend_data,result_data = await self.accepet_request(data["requestid"],user)
+            is_success,friend_data,result_data = await self.accepet_request(data["requestid"],user,data["verify_code"])
 
             if is_success:
                 send_dict = {
@@ -179,14 +187,17 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 )
 
                 send_dict = {
-                    "msgtype":"accepted_friend_request",
+                    "msgtype":"accept_friend_request",
                     "request_id" : str(data["requestid"])
                 }
 
                 base_dict["data"] = send_dict
                 await self.send(text_data=json.dumps(base_dict))
+
+                await self.init_friend(user)
             else:
-                await self.send(text_data=json.dumps(result_data))
+                base_dict["data"] = result_data
+                await self.send(text_data=json.dumps(base_dict))
         elif command == "get_friends":
             #フレンド一覧を取得する
             friends_data = await self.get_friends(user)
@@ -215,7 +226,14 @@ class ChatConsumer(AsyncWebsocketConsumer):
             await self.send(text_data=json.dumps(base_dict))
         elif command == "update_memo":
             #メモを更新する
-            await self.update_memo(user,data)
+            if await self.update_memo(user,data):
+                #結果
+                send_dict = {
+                    "msgtype":"success_update_memo",
+                }
+                #結果を送信する
+                base_dict["data"] = send_dict
+                await self.send(text_data=json.dumps(base_dict))
         
         elif command == "reject_request":
             #結果
@@ -250,41 +268,93 @@ class ChatConsumer(AsyncWebsocketConsumer):
             await self.send(text_data=json.dumps(base_dict))
 
         elif command == "post_location":
-            is_success,friends_data = await self.post_location(user,data)
+            is_success,return_result = await self.post_location(user,data)
 
             if is_success:
-                for friendid in friends_data.keys():
-                    #近くにいるフレンドに通知を送る
 
-                    send_dict = {
-                        "msgtype" : "friend_geo_notify",
-                        "data" : friends_data[friendid]
-                    }
+                for userid in return_result.keys():
+       
+                    if return_result[userid]["command"] == "notify_not_friend":
+                        send_dict = {
+                            "msgtype":"near_friend_notify",
+                            "userid" : return_result[userid]["near_userid"],
+                            "username" : return_result[userid]["near_username"],
+                            "geodata" : return_result[userid]["geodata"],
+                            "show_notify" : return_result[userid]["show_notify"],
+                        }
+                    elif return_result[userid]["command"] == "remove_map_pin":
+                        send_dict = {
+                            "msgtype":"remove_map_pin",
+                            "userid" : return_result[userid]["near_userid"],
+                        }
 
+                    if str(return_result[userid]["near_userid"]) != str(user.userid):
+                        base_dict["data"] = send_dict
+                        await self.send(text_data=json.dumps(base_dict))
+                    #送信元ユーザーに承認したことを送る
                     await self.channel_layer.group_send(  # 指定グループにメッセージを送信する
-                        str(friendid),
+                        str(userid),
                         {
                             'type': 'data_message',
                             'data': send_dict,
                             'user': str(self.scope['user'].userid),
                         }
                     )
-                
-                #近くのフレンド一覧を送り返す
+        elif command == "update_distance":
+            is_succsess,distance = await self.update_distance(user,data)
+
+            if is_succsess:
+                #結果
                 send_dict = {
-                    "msgtype" : "near_friends_notify",
-                    "data" : friends_data
+                    "msgtype":"success_update_distance",
+                    "distance" : distance
                 }
+                #結果を送信する
                 base_dict["data"] = send_dict
                 await self.send(text_data=json.dumps(base_dict))
+        elif command == "get_now_distance":
+            is_succsess,distance = await self.get_distance(user)
 
+            if is_succsess:
+                #結果
+                send_dict = {
+                    "msgtype":"now_distance",
+                    "distance" : distance
+                }
+                #結果を送信する
+                base_dict["data"] = send_dict
+                await self.send(text_data=json.dumps(base_dict))
         else:
             print(data_json)
+    #ユーザー初期化
+    @sync_to_async
+    def init_user(self,user):
+        try:
+            geo_data = Geo_Data.objects.get(user = user)
+            
+        except Geo_Data.DoesNotExist:
+            geo_data = Geo_Data()
+        except:
+            import traceback
+            traceback.print_exc()
+
+            return
+    
+        try:
+            geo_data.latitude = -1
+            geo_data.longitude = -1
+
+            geo_data.save()
+        except:
+            import traceback
+            traceback.print_exc()
 
     #位置情報更新
     @sync_to_async
     def post_location(self,user,data):
         try:
+            return_dict = {}
+
             geo_data = Geo_Data.objects.get(user = user)
 
             geo_data.latitude = data["latitude"]
@@ -294,18 +364,22 @@ class ChatConsumer(AsyncWebsocketConsumer):
             
             #フレンドを検索する
             friends = Friend_data.objects.filter(Q(to_user = user) | Q(from_user = user))
-
-            return_dict = {}
-
+            
             for friend in friends.all():
+                is_toUser = False
+
                 if friend.from_user == user:
                     friend_user = friend.to_user
+                    is_notifyed = friend.to_already_notify
                 else:
                     friend_user = friend.from_user
-
+                    is_notifyed = friend.from_already_notify
+                    is_toUser = True
                 
-                #フレンドユーザーが接続していなかったら戻る
-                if not friend_user.now_connected:
+                is_succsess,distance = self.get_distance_sync(user,friend_user)
+
+                #登録していなかったら
+                if not is_succsess:
                     continue
 
                 #位置情報取得
@@ -329,16 +403,51 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 #距離をメートルで取得
                 distance_m = geodesic([myself_latitude,myself_longitude],[friend_latitube,friend_longitude]).m
 
-                if 5000 > distance_m:
-                    return_dict[str(friend_user.userid)] = {
-                        "username" : str(friend_user.username),
-                        "geo_data" : [friend_latitube,friend_longitude],
-                        "distance" : distance_m,
-                        "timestamp" : str(time.mktime(friend_geo_data.timestamp.timetuple()))
-                    }
-                
-            return True,return_dict
+                if is_succsess:
 
+                    logging.info(f"{str(distance_m)} : {distance}")
+                    if distance_m < distance:
+                        show_notify = False
+
+                        if is_toUser:
+                            if friend.to_already_notify:
+                                show_notify = False
+                                
+                            else:
+                                show_notify = True
+                                friend.to_already_notify = True
+                        else:
+                            if friend.from_already_notify:
+                                show_notify = False
+                            else:
+                                show_notify = True
+                                friend.from_already_notify = True
+
+                        friend.is_neared = True
+                        friend.save()
+
+                        
+                        return_dict[str(friend_user.userid)] = {
+                            "command" : "notify_not_friend",
+                            "geodata" : [data["latitude"],data["longitude"]],
+                            "near_username" : str(user.username),
+                            "near_userid" : str(user.userid),
+                            "show_notify" : show_notify
+                        }
+
+                    else:
+                        if friend.is_neared:
+                            return_dict[str(friend_user.userid)] = {
+                                "command" : "remove_map_pin",
+                                "near_userid" : str(user.userid),
+                            }
+
+                            friend.is_neared = False
+                        friend.to_already_notify = False
+                        friend.from_already_notify = False
+                        friend.save()
+
+            return True,return_dict
         except Geo_Data.DoesNotExist:
             geo_data = Geo_Data()
 
@@ -348,14 +457,123 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
             geo_data.save()
 
+            return True,{}
         except:
             import traceback
             traceback.print_exc()
 
             return False,{}
-        
-        return True,{}
+    
+    @sync_to_async
+    def update_distance(self,user,data):
+        try:
+            #位置情報取得
+                if int(data["distance"]) >= 5 and int(data["distance"]) <= 5000:
+                    pass
+                else:
+                    return False, 0
+ 
+                userSetting = user_setting.objects.get(user = user)
+                
+                userSetting.notify_disatance = int(data["distance"])
 
+                userSetting.save()
+                
+                return True,userSetting.notify_disatance
+        except user_setting.DoesNotExist:
+            userSetting = user_setting()
+
+            userSetting.user = user
+                
+            userSetting.notify_disatance = int(data["distance"])
+
+            userSetting.save()
+
+            return True
+
+        except:
+            import traceback
+            traceback.print_exc()
+
+            return False
+    
+    @sync_to_async
+    def get_distance(self,user):
+        try:            
+            #位置情報取得
+            userSetting = user_setting.objects.get(user = user)
+            
+            return True,userSetting.notify_disatance
+        except user_setting.DoesNotExist:
+            userSetting = user_setting()
+
+            userSetting.user = user
+                
+            userSetting.notify_disatance = default_distance
+
+            userSetting.save()
+
+            return True,userSetting.notify_disatance
+
+        except:
+            import traceback
+            traceback.print_exc()
+
+            return False,0
+    
+    def get_distance_sync(self,user,friend_user):
+        return_distance = 0
+
+        myself_distance = 0
+        friend_distance = 0
+
+        try:            
+            #自身の設定を取得
+            my_userSetting = user_setting.objects.get(user = user)
+            
+            myself_distance = my_userSetting.notify_disatance
+        except user_setting.DoesNotExist:
+            userSetting = user_setting()
+
+            userSetting.user = user
+                
+            userSetting.notify_disatance = default_distance
+
+            userSetting.save()
+
+        except:
+            import traceback
+            traceback.print_exc()
+
+            return False,0
+
+        try:            
+            #フレンドの設定を取得
+            friend_userSetting = user_setting.objects.get(user = friend_user)
+            
+            friend_distance = friend_userSetting.notify_disatance
+        except user_setting.DoesNotExist:
+            userSetting = user_setting()
+
+            userSetting.user = friend_user
+                
+            userSetting.notify_disatance = default_distance
+
+            userSetting.save()
+
+        except:
+            import traceback
+            traceback.print_exc()
+
+            return False,0
+
+        #どちらのほうが大きいか比較する
+        if myself_distance > friend_distance:
+            return_distance = friend_distance
+        else:
+            return_distance = myself_distance
+        
+        return True,return_distance
     #フレンドを削除する
     @sync_to_async
     def remove_friend(self,user,data) -> bool:
@@ -447,25 +665,35 @@ class ChatConsumer(AsyncWebsocketConsumer):
     #メモを更新する
     @sync_to_async
     def update_memo(self,user,data):
-        from_user = str(user.userid)
-        
-        #フレンドかどうかをチェックする
-        is_friend,friend_data = self.check_friend_sync(from_user,data["friendid"])
-
-        if is_friend:
-            memo_value = data["uodate_memo"]
-
-            #フレンドで更新対象がfrom_userか
-            if friend_data.from_user == user:
-                friend_data.to_user_memo = memo_value
-            else:
-                friend_data.from_user_memo = memo_value
+        try:
+            from_user = str(user.userid)
             
-            #更新する
-            friend_data.save()
+            #フレンドかどうかをチェックする
+            is_friend,friend_data = self.check_friend_sync(from_user,data["friendid"])
+
+            if is_friend:
+                memo_value = data["uodate_memo"]
+
+                #フレンドで更新対象がfrom_userか
+                if friend_data.from_user == user:
+                    friend_data.to_user_memo = memo_value
+                else:
+                    friend_data.from_user_memo = memo_value
+                
+                #更新する
+                friend_data.save()
+            
+                return True
+            else:
+                return False
+        except:
+            import traceback
+            traceback.print_exc()
+        
+        return False
 
     @sync_to_async 
-    def accepet_request(self,requestid,acceptuser):
+    def accepet_request(self,requestid,acceptuser,verify_code):
         filter_requests = Friend_request.objects.filter(dataid = requestid)
 
         if not filter_requests.exists():
@@ -479,6 +707,13 @@ class ChatConsumer(AsyncWebsocketConsumer):
         try:
             #宛先ユーザーが一致するか確認する
             request = filter_requests.get(to_user = acceptuser)
+
+            #コードを検証する
+            if str(request.verify_code) != verify_code:
+                return False,"", {
+                    "msgtype":"request_accpet_error",
+                    "requestid" : requestid
+                }
 
             #フレンド情報を登録する
             register_data = Friend_data()
@@ -517,10 +752,21 @@ class ChatConsumer(AsyncWebsocketConsumer):
         user.save()
     
     @sync_to_async
-    def get_friends(self,user) -> list:
+    def init_friend(self,user):
+        friends = Friend_data.objects.filter(Q(to_user = user) | Q(from_user = user))
+
+        for friend in friends.all():
+            friend.is_neared = False
+            friend.to_already_notify = False
+            friend.from_already_notify = False
+
+            friend.save()
+
+    @sync_to_async
+    def get_friends(self,user):
         return self.get_friends_sync(user)
 
-    def get_friends_sync(self,user) -> list:
+    def get_friends_sync(self,user):
         friends = Friend_data.objects.filter(Q(to_user = user) | Q(from_user = user))
 
         result_list = []
@@ -558,14 +804,13 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
         try:
             #ユーザー検索
-            #TODO results = CustomUser.objects.filter(username=username).all()
-            results = CustomUser.objects.filter(username__contains=username).all()
+            results = CustomUser.objects.filter(username = username).all()
 
             #結果
             for match_user in results:
                 user_dict = {}
 
-                user_dict["user_name"] = match_user.username                #ユーザーメイ
+                user_dict["user_name"] = match_user.username                #ユーザーメーイ
 
                 #フレンドか
                 is_friend,friend_data = self.check_friend_sync(str(user.userid),str(match_user.userid))
@@ -603,7 +848,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
         try:
             #ユーザー検索
-            #TODO results = CustomUser.objects.filter(username=username).all()
             results = Friend_request.objects.filter(to_user = to_user).all()
 
             #結果
@@ -650,8 +894,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 request_dict = {}
 
                 request_dict["user_name"] = str(request_data.to_user.username)                    #送信元ユーザー名
-                request_dict["sender_id"] = str(request_data.to_user.userid)                  #送信元ユーザー名
-                request_dict["timestamp"] = request_data.timestamp.strftime("%Y/%m/%d %H:%M:%S")    #送信日時
+                request_dict["sender_id"] = str(request_data.to_user.userid)                      #送信元ユーザー名
+                request_dict["timestamp"] = request_data.timestamp.strftime("%Y/%m/%d %H:%M:%S")  #送信日時
+                request_dict["verify_code"] = str(request_data.verify_code)                       #認証コード
 
                 send_dict["sended_requests"][str(request_data.dataid)] = request_dict
 
@@ -746,48 +991,15 @@ class ChatConsumer(AsyncWebsocketConsumer):
         return CustomUser.objects.filter(userid = checkid).exists()
 
     async def data_message(self, event):
-        print("data message")
-
         # グループメッセージを受け取る
         user = event['user']
+
+        sender_user = self.scope["user"]
+
+        #logging.info(f"{str(sender_user.userid)} -> {str(user)}")
 
         await self.send(text_data=json.dumps({
             "msgtype":"server_msg",
             "data":event["data"],
             'user': user,
         }))
-
-    """
-    async def chat_message(self, event):
-        # グループメッセージを受け取る
-        message = event['data']
-        user = event['user']
-        # websocket でメッセージを送信する
-        await self.send(text_data=json.dumps({
-            'type': 'chat_message',
-            'message': message,
-            'user': user,
-        }))
-
-    # Receive message from room group
-    async def send_message(self, event):
-        message = event["data"]-p0--0\-^^
-
- 
-        # Send message to WebSocket
-        await self.send(text_data=json.dumps({"data": message}))
-    """
-
-
-"""
-room_id = str(user.userid)
-
-        await self.channel_layer.group_send(  # 指定グループにメッセージを送信する
-            "93977bc4-5819-4529-bc00-926f8e3398da",
-            {
-                'type': 'chat_message',
-                'message': "hello",
-                'user': str(self.scope['user'].userid),
-            }
-        )
-"""
