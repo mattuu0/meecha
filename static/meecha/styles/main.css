@@ -78,7 +78,7 @@ button,input[type = button]{
 
 .map_area {
     width: 100vw;
-    height: 70vh;
+    height: 80vh;
     z-index: 100;
     margin: 20px 0;
 }
