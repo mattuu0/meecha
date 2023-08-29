@@ -31,6 +31,9 @@ var myself_marker = null;
 var myself_position = [0,0];
 var myself_init = false;
 
+//送信済みリクエスト
+var recved_requests = {}
+
 //Websockeet
 let ws_conn;
 var ws_connected = false;
@@ -84,6 +87,7 @@ function connect_ws() {
                         break;
                     case "accept_friend_request":
                         toastr["info"]("フレンドリクエストを承認しました");
+                        success_accept_request(msg_data);
                         break;
                     case "near_friend_notify":
                         show_near_friend(msg_data);
@@ -234,13 +238,18 @@ function show_recved_requests(result) {
     clear_child_elems(recved_request_show_area);
 
     for (let requestid in result) {
+        try {
+            delete_sended_request(requestid);
+        } catch (ex) {
+            console.log(ex.message)
+        }
         //送信者ID
         let senderid = result[requestid].sender_userid;  
         
         //送信者名
         let sender_name = result[requestid].user_name;
 
-        show_friend_request(senderid,sender_name,requestid,recved_request_show_area)
+        show_friend_request(senderid,sender_name,requestid,recved_request_show_area);
     }
 }
  
@@ -291,11 +300,26 @@ function show_friend_request(senderid,username,requestid,showdiv) {
     reject_btn.addEventListener("click",reject_friend_request);
     add_div.append(reject_btn);
 
+    //承認コード入力
+    let verify_code_area = document.createElement("input");
+    verify_code_area.type = "text";
+    verify_code_area.base_div = add_div;
+    verify_code_area.placeholder = "承認コード"
 
+    add_div.append(verify_code_area);
+
+    //ボタンなどを追加する
     showdiv.appendChild(add_div);
+
+    try {
+        recved_requests[String(requestid)] = {div : add_div,verify_area : verify_code_area};
+    } catch (ex) {
+        console.log(ex.message);
+    }
 }
 
 //取得した受信済みフレンドリクエストを表示する
+/*
 function show_friend_requests(result) {
     clear_child_elems(recved_request_show_area);
 
@@ -303,6 +327,7 @@ function show_friend_requests(result) {
         show_friend_request(result[requestid].sender_id,result[requestid].user_name,requestid,recved_request_show_area);
     }
 }
+*/
 
 //取得した送信済みフレンドリクエストを表示する
 function show_sended_friend_requests(result) {
@@ -427,8 +452,9 @@ function send_command(command,data) {
 function accept_friend_request(evt) {
     //ユーザーID
     let send_id = evt.target.requestid;
+    let send_code = String(recved_requests[send_id]["verify_area"].value);
 
-    send_command("accept_request",{requestid:send_id,verify_code:"00000"});
+    send_command("accept_request",{requestid:send_id,verify_code:send_code});
 }
 
 //フレンドを削除
@@ -475,6 +501,17 @@ function clear_friend_search(evt) {
     clear_child_elems(search_result_area);
 }
 
+//フレンドリクエストを承認したとき
+function success_accept_request(accept_data) {
+    delete_sended_request(accept_data["request_id"]);
+}
+
+function delete_sended_request(request_id) {
+    var delete_div = recved_requests[request_id]["div"];
+    delete_div.remove()
+
+    delete recved_requests[request_id]
+}
 
 //検索結果表示
 function show_search_result(result) {
