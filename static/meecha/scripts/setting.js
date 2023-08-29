@@ -138,7 +138,6 @@ let distance_show_area = document.getElementById("distance_show");
 
 select_box.addEventListener("change",change_distance);
 
-let popup = document.getElementById('popup');
 //popup.classList.toggle('is-show');
 //追加機能
 
@@ -157,14 +156,23 @@ const recved_request_show_area = document.getElementById("recved_request_show_ar
 //受信済みリクエスト取得ボタン
 const get_recved_request_button = document.getElementById("get_request_button");
 
+//受信済みリクエスト表示エリア
+const recved_request_area = document.getElementById("show_recved_request_area");
+
 //送信済みリクエスト取得ボタン
 const get_sended_request_button = document.getElementById("sended_request_button");
+
+//送信済みリクエスト表示
+const sended_request_area = document.getElementById("show_sended_request_area");
 
 //送信済みリクエスト表示場所
 const sended_request_show_area = document.getElementById("sended_request_show_area");
 
 //フレンド取得ボタン
 const get_friends_btn = document.getElementById("get_friends_button");
+
+//フレンド一覧表示場所
+const pupup_friends_show_area = document.getElementById("pupup_friends_show_area");
 
 //フレンド表示場所
 const friend_show_area = document.getElementById("friends_show_area");
@@ -175,6 +183,8 @@ const friend_show_view = document.getElementById("friends_area");
 //マップを追跡させるか
 const clear_search_btn = document.getElementById("search_clear_btn");
 
+let popup = document.getElementById('popup');
+//popup.classList.toggle('is-show');
 
 function init(evt) {
     //オブジェクト取得
@@ -547,16 +557,20 @@ function send_firend_req(evt) {
 
 //受信済みフレンドリクエストを取得する
 function get_friend_request(evt) {
+    recved_request_area.classList.toggle("is-show")
     send_command("get_recved_request",{});
 }
 
 //送信済みフレンドリクエストを取得する
 function get_sended_friend_request(evt) {
+    sended_request_area.classList.toggle("is-show");
     send_command("get_sended_request",{});
 }
 
 //フレンド一覧を取得する
 function get_friends(evt) {
+    pupup_friends_show_area.classList.toggle("is-show");
+
     send_command("get_friends",{});
 
     friend_show_view.style.display = "absolute";
