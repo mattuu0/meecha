@@ -59,7 +59,7 @@ button{
   margin: 0 5%;
 }
 
-.password,.logout,.distance{
+.menu{
   display: flex;
   align-items: center;
   margin-bottom: 20px;
@@ -67,6 +67,11 @@ button{
 
 .logout{
   margin-left: 2%; 
+}
+
+.friends img{
+  width: 10vw;
+  height: 9vw;
 }
 
 .set img{
