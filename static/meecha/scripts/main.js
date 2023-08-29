@@ -85,6 +85,20 @@ function connect_ws() {
 
 connect_ws();
 
+//サーバーにコマンドを送信する
+function send_command(command,data) {
+    if (ws_connected) {
+        var packet = {
+            "command":command,
+            "data":data
+        }
+        
+        var send_data = JSON.stringify(packet);
+
+        ws_conn.send(send_data);
+    }
+}
+
 //マップを追跡させるか
 const auto_change_map_check = document.getElementById("auto_change_map");
 
