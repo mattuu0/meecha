@@ -13,3 +13,8 @@ redis_bin
 __pycache__
 
 migrations
+
+*.apk
+*.webapp
+
+run.py

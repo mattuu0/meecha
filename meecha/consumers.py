@@ -9,7 +9,7 @@ from django.db.models import Q
 from geopy.distance import geodesic
 import logging
 
-default_distance = 5000
+default_distance = 50
 
 class ChatConsumer(AsyncWebsocketConsumer):
     user_searching = False

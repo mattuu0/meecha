@@ -175,7 +175,7 @@ function success(pos) {
     
     //マーカーが設定されていなかったら現在地に打つ
     if (myself_marker == null) {
-        main_map.setView([crd.latitude,crd.longitude],15);
+        main_map.setView([crd.latitude,crd.longitude],20);
 
         var popup = L.popup();
         myself_marker = L.marker([crd.latitude,crd.longitude]).addTo(main_map).on('click', function (e) {
