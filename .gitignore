@@ -18,3 +18,5 @@ migrations
 *.webapp
 
 run.py
+
+keys/
